@@ -7,7 +7,7 @@
 
 import Foundation
 
-public final class Logger {
+public final class Logger: Sendable {
     public enum Level: String {
         case info = "INFO"
         case warning = "WARN"
