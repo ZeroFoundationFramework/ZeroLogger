@@ -12,11 +12,19 @@ public final class Logger {
         case info = "INFO"
         case warning = "WARN"
         case error = "ERROR"
+        case dev = "DEV" // Neues Level für Entwicklungs-Logs
+
+        /// Gibt den ANSI-Farbcode für das jeweilige Log-Level zurück.
+        var colorCode: String {
+            switch self {
+            case .info: return "\u{001B}[34m"    // Blau
+            case .warning: return "\u{001B}[33m" // Gelb
+            case .error: return "\u{001B}[31m"   // Rot
+            case .dev: return "\u{001B}[32m"     // Grün
+            }
+        }
     }
 
-    // HIER IST DIE ÄNDERUNG:
-    // Wir erstellen einen einzigen, wiederverwendbaren Formatter.
-    // Das ist performanter und abwärtskompatibel.
     nonisolated(unsafe) private static let iso8601Formatter: ISO8601DateFormatter = {
         let formatter = ISO8601DateFormatter()
         formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
@@ -40,11 +48,15 @@ public final class Logger {
     public func error(_ message: String) {
         log(level: .error, message: message)
     }
+    
+    public func dev(_ message: String) {
+        log(level: .dev, message: message)
+    }
 
     private func log(level: Level, message: String) {
-        // HIER IST DIE ÄNDERUNG:
-        // Wir verwenden jetzt den robusten Formatter.
         let timestamp = Self.iso8601Formatter.string(from: Date())
-        print("[\(timestamp)] [\(level.rawValue)] [\(label)]: \(message)")
+        // Füge den Farbcode am Anfang und einen Reset-Code am Ende hinzu.
+        let resetCode = "\u{001B}[0m"
+        print("\(level.colorCode)[\(timestamp)] [\(level.rawValue)] [\(label)]: \(message)\(resetCode)")
     }
 }
